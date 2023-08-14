@@ -270,6 +270,12 @@ impl Div for Num {
         Self{ big: self.big / rhs.big }
     }
 }
+impl<T: Integer> Div<T> for Num {
+    type Output = Self;
+    fn div(self, rhs: T) -> Self {
+        Self{ big: self.big / rhs.to_i128() }
+    }
+}
 
 
 impl Neg for Num {
