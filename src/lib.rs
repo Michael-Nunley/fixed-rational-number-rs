@@ -1,11 +1,7 @@
+use std::cmp::Ordering;
 //use serde::{Deserialize, Serialize};
 use cordic::*;
 
-
-
-pub trait FloatingPoint: Into<f64> {}
-impl FloatingPoint for f32  {}
-impl FloatingPoint for f64  {}
 
 pub trait Integer {
     fn to_i128(self) -> i128;
@@ -36,7 +32,7 @@ impl Integer for u128 {
 
 
 
-#[derive(Debug, Eq, Copy, PartialEq, /*Serialize, Deserialize,*/ Clone, Default)]
+#[derive(Debug, Eq, Copy, PartialEq, PartialOrd, Clone, Default)]
 pub struct Num {
     big: i128,
 }
@@ -79,9 +75,9 @@ impl Num {
         Self { big: (2 << 8) | (183),}
     }
 
-    pub fn from_u0f64(val: u64) -> Self {
+    pub fn from_u0f64(val: fixed::types::U0F64) -> Self {
         Self {
-            big: ((val as i128) << 8),
+            big: (val.to_bits() as i128),
         }
     }
 
@@ -90,7 +86,7 @@ impl Num {
 }
 
 
-use std::ops::Add;
+use std::ops::{Add, AddAssign, Div, Neg, Shl, Shr, SubAssign};
 impl Add<Num> for Num {
     type Output = Self;
     fn add(self, other: Num) -> Num {
@@ -258,6 +254,64 @@ impl Mul<f32> for Num {
 }
 
 
+impl AddAssign for Num {
+    fn add_assign(&mut self, rhs: Self) {
+        self.big = self.big + rhs.big
+    }
+}
+
+impl SubAssign for Num {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.big = self.big - rhs.big
+    }
+}
+
+impl Div for Num {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        todo!()
+    }
+}
+
+
+impl Neg for Num {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Num::zero() - self
+    }
+}
+
+
+impl Shr<u8> for Num {
+    type Output = Self;
+
+    fn shr(self, rhs: u8) -> Self::Output {
+        Self { big: self.big >> rhs }
+    }
+}
+
+impl Shl<u8> for Num {
+    type Output = Self;
+
+    fn shl(self, rhs: u8) -> Self::Output {
+        Self { big: self.big << rhs }
+    }
+}
+
+impl CordicNumber for Num {
+    fn floor(self) -> Self { self.floor() }
+    fn zero() -> Self { Num::zero() }
+    fn one() -> Self { Num::one() }
+    fn frac_pi_2() -> Self { Num::frac_pi_2() }
+    fn pi() -> Self { Num::pi() }
+    fn e() -> Self { Num::e() }
+    fn from_u0f64(val: fixed::types::U0F64) -> Self  { Num::from_u0f64(val) }
+    fn num_fract_bits() -> u8 { Num::num_fract_bits() }
+    fn num_bits() -> u8 { Num::num_bits() }
+}
+
 
 
 fn get_decimal_numbers(num: f64) -> String {
@@ -291,5 +345,13 @@ mod tests {
     fn add() {
         let result = Num::one() + Num::one();
         assert_eq!(result, Num::new(2,0));
+    }
+
+    #[test]
+    fn cordic_test() {
+        let a = Num::one();
+        let b = sqrt(a);
+        println!("{}", sqrt(Num::one() + Num::one()));
+        assert_eq!(a,b);
     }
 }
