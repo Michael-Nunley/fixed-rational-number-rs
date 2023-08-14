@@ -1,7 +1,4 @@
-use std::cmp::Ordering;
-//use serde::{Deserialize, Serialize};
 use cordic::*;
-
 
 pub trait Integer {
     fn to_i128(self) -> i128;
@@ -270,7 +267,7 @@ impl Div for Num {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
-        todo!()
+        Self{ big: self.big / rhs.big }
     }
 }
 
