@@ -48,7 +48,11 @@ impl Num {
     pub fn from_u0f64(val: U0F64) -> Self {
         Self { i: val.to_num() }
     }
+    pub fn abs(self) -> Self {
+        Self { i: self.i.abs() }
+    }
 }
+
 use std::ops::{Add, AddAssign, Div, Mul, Neg, Shl, Shr, Sub, SubAssign};
 
 impl AddAssign for Num {
@@ -167,12 +171,17 @@ mod tests {
             );
         }
     }
-    pub const ERRMAX: f64 = 0.00000001_f64;
+    const ERRMAX: f64 = 0.00000001_f64;
 
     #[test]
     fn num_new() {
         let result = Num::one().neg();
         assert_approx_eq(0, result.to_num(), Num::from_num(-1).to_num(), ERRMAX);
+    }
+    #[test]
+    fn abs() {
+        let result = Num::one().neg().abs();
+        assert_approx_eq(0, result.to_num(), Num::from_num(1).to_num(), ERRMAX);
     }
     #[test]
     fn zero() {
